@@ -73,17 +73,14 @@
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
        
         //计算该section列数
-        NSInteger lines = 0;
-        CGSize size = CGSizeZero;
-        if (self.block != nil) {
-            size = self.block([NSIndexPath indexPathForRow:0 inSection:i]);
-        }else{
-            NSAssert(size.width != 0 ,@"未实现block");
-        }
-        lines = self.collectionWidth/size.width;
+        NSInteger tColumns = 0;
+        CGSize tCellSize = CGSizeZero;
+        NSAssert(self.block ,@"未实现block");
+        tCellSize = self.block([NSIndexPath indexPathForRow:0 inSection:i]);
+        tColumns = self.collectionWidth/tCellSize.width;
         
         //存储每个列数的长度
-        for (NSInteger k = 0; k < lines; k++) {
+        for (NSInteger k = 0; k < tColumns; k++) {
             [dict setObject:@(self.sectionInset.top) forKey:[NSString stringWithFormat:@"%ld",(long)k]];
         }
         [_arrOfSize addObject:dict];
@@ -124,14 +121,11 @@
     
     //创建item的属性
     UICollectionViewLayoutAttributes *attr = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
-    CGSize size = CGSizeZero;
-    if (self.block != nil) {
-        size = self.block(indexPath);
-    }else{
-        NSAssert(size.width != 0 ,@"未实现block");
-    }
+    CGSize tCellSize = CGSizeZero;
+    NSAssert(self.block ,@"未实现block");
+    tCellSize = self.block(indexPath);
     CGRect frame;
-    frame.size = size;
+    frame.size = tCellSize;
     
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:[_arrOfSize objectAtIndex:indexPath.section]];
     //循环遍历找出高度最短行
@@ -145,7 +139,7 @@
     
     
     //找出最短行后，计算item位置
-    frame.origin = CGPointMake(line * (size.width + self.lineSpacing), [dict[lineMinHeight] floatValue] + self.collectionSizeHeight);
+    frame.origin = CGPointMake(line * (tCellSize.width + self.lineSpacing), [dict[lineMinHeight] floatValue] + self.collectionSizeHeight);
     dict[lineMinHeight] = @(frame.size.height + self.rowSpacing + [dict[lineMinHeight] floatValue]);
     //存储高度
     [_arrOfSize replaceObjectAtIndex:indexPath.section withObject:dict];
